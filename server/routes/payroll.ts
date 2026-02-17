@@ -2,11 +2,12 @@ import express, { Request, Response } from 'express';
 import Payroll from '../models/Payroll';
 import Employee from '../models/Employee';
 import { protect, checkPermission } from '../middleware/auth';
+import { RESOURCE_NAMES } from '../constants/resources';
 
 const router = express.Router();
 
 // Get payroll records
-router.get('/', protect, checkPermission('Payroll', 'canView'), async (req: Request, res: Response) => {
+router.get('/', protect, checkPermission(RESOURCE_NAMES.PAYROLL, 'canView'), async (req: Request, res: Response) => {
     try {
         const { month, year } = req.query;
         const query: any = {};
@@ -21,7 +22,7 @@ router.get('/', protect, checkPermission('Payroll', 'canView'), async (req: Requ
 });
 
 // Generate payroll
-router.post('/generate', protect, checkPermission('Payroll', 'canSave'), async (req: Request, res: Response) => {
+router.post('/generate', protect, checkPermission(RESOURCE_NAMES.PAYROLL, 'canSave'), async (req: Request, res: Response) => {
     const { month, year } = req.body;
 
     if (!month || !year) {

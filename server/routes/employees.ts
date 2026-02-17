@@ -2,11 +2,12 @@ import express, { Request, Response } from 'express';
 import Employee from '../models/Employee';
 import Department from '../models/Department';
 import { protect, checkPermission } from '../middleware/auth';
+import { RESOURCE_NAMES } from '../constants/resources';
 
 const router = express.Router();
 
 // Get all employees
-router.get('/', protect, checkPermission('Employees', 'canView'), async (req: Request, res: Response) => {
+router.get('/', protect, checkPermission(RESOURCE_NAMES.EMPLOYEES, 'canView'), async (req: Request, res: Response) => {
     try {
         const employees = await Employee
             .find()
@@ -23,7 +24,7 @@ router.get('/', protect, checkPermission('Employees', 'canView'), async (req: Re
 });
 
 // Create an employee
-router.post('/', protect, checkPermission('Employees', 'canSave'), async (req: Request, res: Response) => {
+router.post('/', protect, checkPermission(RESOURCE_NAMES.EMPLOYEES, 'canSave'), async (req: Request, res: Response) => {
     try {
         const employee = await Employee.create(req.body);
         res.status(201).json(employee);
@@ -33,7 +34,7 @@ router.post('/', protect, checkPermission('Employees', 'canSave'), async (req: R
 });
 
 // Update an employee
-router.put('/:id', protect, checkPermission('Employees', 'canEdit'), async (req: Request, res: Response) => {
+router.put('/:id', protect, checkPermission(RESOURCE_NAMES.EMPLOYEES, 'canEdit'), async (req: Request, res: Response) => {
     try {
         const employee = await Employee.findByIdAndUpdate(req.params.id, req.body, { new: true });
         res.json(employee);
@@ -43,7 +44,7 @@ router.put('/:id', protect, checkPermission('Employees', 'canEdit'), async (req:
 });
 
 // Delete an employee
-router.delete('/:id', protect, checkPermission('Employees', 'canDelete'), async (req: Request, res: Response) => {
+router.delete('/:id', protect, checkPermission(RESOURCE_NAMES.EMPLOYEES, 'canDelete'), async (req: Request, res: Response) => {
     try {
         await Employee.findByIdAndDelete(req.params.id);
         res.json({ message: 'Employee removed' });

@@ -1,11 +1,12 @@
 import express, { Request, Response } from 'express';
 import Allowance from '../models/Allowance';
 import { protect, checkPermission } from '../middleware/auth';
+import { RESOURCE_NAMES } from '../constants/resources';
 
 const router = express.Router();
 
 // Get all allowances
-router.get('/', protect, checkPermission('Payroll', 'canView'), async (req: Request, res: Response) => {
+router.get('/', protect, checkPermission(RESOURCE_NAMES.PAYROLL, 'canView'), async (req: Request, res: Response) => {
     try {
         const allowances = await Allowance.find().sort({ createdAt: -1 });
         res.json(allowances);
@@ -15,7 +16,7 @@ router.get('/', protect, checkPermission('Payroll', 'canView'), async (req: Requ
 });
 
 // Create an allowance
-router.post('/', protect, checkPermission('Payroll', 'canSave'), async (req: Request, res: Response) => {
+router.post('/', protect, checkPermission(RESOURCE_NAMES.PAYROLL, 'canSave'), async (req: Request, res: Response) => {
     try {
         const allowance = await Allowance.create(req.body);
         res.status(201).json(allowance);
@@ -25,7 +26,7 @@ router.post('/', protect, checkPermission('Payroll', 'canSave'), async (req: Req
 });
 
 // Update an allowance
-router.put('/:id', protect, checkPermission('Payroll', 'canEdit'), async (req: Request, res: Response) => {
+router.put('/:id', protect, checkPermission(RESOURCE_NAMES.PAYROLL, 'canEdit'), async (req: Request, res: Response) => {
     try {
         const allowance = await Allowance.findByIdAndUpdate(req.params.id, req.body, { new: true });
         res.json(allowance);
@@ -35,7 +36,7 @@ router.put('/:id', protect, checkPermission('Payroll', 'canEdit'), async (req: R
 });
 
 // Delete an allowance
-router.delete('/:id', protect, checkPermission('Payroll', 'canDelete'), async (req: Request, res: Response) => {
+router.delete('/:id', protect, checkPermission(RESOURCE_NAMES.PAYROLL, 'canDelete'), async (req: Request, res: Response) => {
     try {
         await Allowance.findByIdAndDelete(req.params.id);
         res.json({ message: 'Allowance removed' });

@@ -1,11 +1,12 @@
 import express, { Request, Response } from 'express';
 import Role from '../models/Role';
 import { protect, checkPermission } from '../middleware/auth';
+import { RESOURCE_NAMES, RESOURCES } from '../constants/resources';
 
 const router = express.Router();
 
 // Get all roles
-router.get('/', protect, checkPermission('Roles', 'canView'), async (req: Request, res: Response) => {
+router.get('/', protect, checkPermission(RESOURCE_NAMES.ROLES, 'canView'), async (req: Request, res: Response) => {
     try {
         const roles = await Role.find();
         res.json(roles);
@@ -14,8 +15,13 @@ router.get('/', protect, checkPermission('Roles', 'canView'), async (req: Reques
     }
 });
 
+// Get all available resources
+router.get('/resources', protect, async (req: Request, res: Response) => {
+    res.json(RESOURCES);
+});
+
 // Create a role
-router.post('/', protect, checkPermission('Roles', 'canSave'), async (req: Request, res: Response) => {
+router.post('/', protect, checkPermission(RESOURCE_NAMES.ROLES, 'canSave'), async (req: Request, res: Response) => {
     try {
         const role = await Role.create(req.body);
         res.status(201).json(role);
@@ -25,7 +31,7 @@ router.post('/', protect, checkPermission('Roles', 'canSave'), async (req: Reque
 });
 
 // Update a role
-router.put('/:id', protect, checkPermission('Roles', 'canEdit'), async (req: Request, res: Response) => {
+router.put('/:id', protect, checkPermission(RESOURCE_NAMES.ROLES, 'canEdit'), async (req: Request, res: Response) => {
     try {
         const role = await Role.findByIdAndUpdate(req.params.id, req.body, { new: true });
         res.json(role);
@@ -35,7 +41,7 @@ router.put('/:id', protect, checkPermission('Roles', 'canEdit'), async (req: Req
 });
 
 // Delete a role
-router.delete('/:id', protect, checkPermission('Roles', 'canDelete'), async (req: Request, res: Response) => {
+router.delete('/:id', protect, checkPermission(RESOURCE_NAMES.ROLES, 'canDelete'), async (req: Request, res: Response) => {
     try {
         await Role.findByIdAndDelete(req.params.id);
         res.json({ message: 'Role removed' });
