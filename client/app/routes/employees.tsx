@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Edit, Trash2, GraduationCap, Briefcase, Minus, Banknote, Calculator, Building2, Wallet, Users } from 'lucide-react';
+import { Plus, Edit, Trash2, GraduationCap, Briefcase, Minus, Banknote, Calculator, Building2, Wallet, Users, Lock } from 'lucide-react';
 
 export default function Employees() {
     const { user } = useAuth();
@@ -33,6 +33,7 @@ export default function Employees() {
         deductions: [] as Array<{ id: string, amount: string }>,
         qualifications: [] as Array<{ degree: string, institution: string, year: string }>,
         experience: [] as Array<{ company: string, position: string, duration: string }>,
+        password: '',
     });
     const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -118,6 +119,7 @@ export default function Employees() {
             }) || [],
             qualifications: employee.qualifications?.map((q: any) => ({ ...q, year: q.year?.toString() })) || [],
             experience: employee.experience || [],
+            password: '',
         });
         setEditingId(employee._id);
         setShowModal(true);
@@ -137,6 +139,7 @@ export default function Employees() {
             deductions: [],
             qualifications: [],
             experience: [],
+            password: '',
         });
         setEditingId(null);
     };
@@ -195,7 +198,7 @@ export default function Employees() {
                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Employee</th>
                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Position & Role</th>
                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Department</th>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Salary & Benefits</th>
+
                             <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
@@ -217,23 +220,6 @@ export default function Employees() {
                                     <span className="px-3 py-1 text-xs font-semibold bg-gray-100 text-gray-700 rounded-full">
                                         {employee.department?.name || 'N/A'}
                                     </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex flex-col">
-                                        <div className="text-sm text-gray-900 font-bold">${employee.basicSalary?.toLocaleString() || '0'}</div>
-                                        <div className="flex flex-wrap gap-1 mt-1">
-                                            {employee.allowances?.length > 0 && (
-                                                <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded border border-emerald-100 italic" title={employee.allowances.map((a: any) => a.allowance?.name).join(', ')}>
-                                                    +{employee.allowances.length} Allowances
-                                                </span>
-                                            )}
-                                            {employee.deductions?.length > 0 && (
-                                                <span className="px-1.5 py-0.5 bg-rose-50 text-rose-600 text-[10px] font-bold rounded border border-rose-100 italic" title={employee.deductions.map((d: any) => d.deduction?.name).join(', ')}>
-                                                    -{employee.deductions.length} Deductions
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
                                     {canEdit && <button onClick={() => handleEdit(employee)} className="text-indigo-600 hover:text-indigo-900 transition"><Edit className="w-5 h-5" /></button>}
@@ -305,6 +291,29 @@ export default function Employees() {
                                                 onChange={(e) => setFormData({ ...formData, position: e.target.value })}
                                                 required
                                             />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase flex items-center">
+                                                <Lock className="w-3 h-3 mr-1 text-indigo-400" />
+                                                {editingId ? 'New Security Password' : 'Initial Credential Password'}
+                                            </label>
+                                            <input
+                                                type="password"
+                                                placeholder={editingId ? 'Leave blank to retain current' : 'Define secure password'}
+                                                className="w-full border border-gray-200 rounded-2xl p-3.5 outline-none focus:ring-2 focus:ring-indigo-500 bg-white transition shadow-sm"
+                                                value={formData.password}
+                                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                                required={!editingId}
+                                            />
+                                        </div>
+                                        <div className="space-y-1 self-end">
+                                            <p className="text-[10px] text-gray-400 font-medium italic mb-2 leading-relaxed">
+                                                {editingId
+                                                    ? "Modifying this field will synchronize the authentication credentials for this professional profile immediately."
+                                                    : "Creating this profile will automatically generate a corresponding authentication identity based on the name and email."}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>

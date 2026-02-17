@@ -15,7 +15,6 @@ interface User {
 interface AuthContextType {
     user: User | null;
     login: (userData: User) => void;
-    register: (userData: User) => void;
     logout: () => void;
     isLoading: boolean;
 }
@@ -56,12 +55,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         navigate('/dashboard');
     };
 
-    const register = (userData: User) => {
-        setUser(userData);
-        localStorage.setItem('user', JSON.stringify(userData));
-        navigate('/dashboard');
-    };
-
     const logout = () => {
         setUser(null);
         localStorage.removeItem('user');
@@ -69,7 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
+        <AuthContext.Provider value={{ user, login, logout, isLoading }}>
             {children}
         </AuthContext.Provider>
     );

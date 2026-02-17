@@ -58,10 +58,15 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 // @desc    Auth user & get token
 // @access  Public
 router.post('/login', async (req: Request, res: Response): Promise<void> => {
-    const { email, password } = req.body;
+    const { email, password } = req.body; // email field here acts as a general identifier
 
     try {
-        const user = await User.findOne({ email }).populate('roles');
+        const user = await User.findOne({
+            $or: [
+                { email: email },
+                { username: email }
+            ]
+        }).populate('roles');
 
         if (user && (await user.comparePassword(password))) {
             res.json({
@@ -72,7 +77,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
                 token: generateToken(user._id as unknown as string),
             });
         } else {
-            res.status(401).json({ message: 'Invalid email or password' });
+            res.status(401).json({ message: 'Invalid credentials' });
         }
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
