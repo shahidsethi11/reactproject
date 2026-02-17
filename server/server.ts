@@ -12,6 +12,9 @@ import authRoutes from './routes/auth';
 import roleRoutes from './routes/roles';
 import employeeRoutes from './routes/employees';
 import departmentRoutes from './routes/departments';
+import allowanceRoutes from './routes/allowances';
+import deductionRoutes from './routes/deductions';
+import payrollRoutes from './routes/payroll';
 
 app.use(cors());
 app.use(express.json());
@@ -20,6 +23,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/departments', departmentRoutes);
+app.use('/api/allowances', allowanceRoutes);
+app.use('/api/deductions', deductionRoutes);
+app.use('/api/payroll', payrollRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

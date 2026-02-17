@@ -1,16 +1,27 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router';
-import { LayoutDashboard, Users, ShieldCheck, LogOut, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Users, ShieldCheck, LogOut, Building2, ChevronLeft, ChevronRight, ChevronDown, Banknote, Calculator, Wallet, Receipt } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Sidebar = () => {
     const { user, logout } = useAuth();
     const location = useLocation();
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [openMenus, setOpenMenus] = useState<string[]>([]);
 
     const checkResourceAccess = (resource: string) => {
-        return user?.roles?.some((role: any) =>
-            role.resourcePermissions?.find((p: any) => p.resource === resource)?.canView
+        if (!user || !user.roles) return false;
+        return user.roles.some((role: any) => {
+            if (typeof role !== 'object') return false;
+            return role.resourcePermissions?.some((p: any) => p.resource === resource && p.canView);
+        });
+    };
+
+    const toggleMenu = (name: string) => {
+        setOpenMenus(prev =>
+            prev.includes(name)
+                ? prev.filter(item => item !== name)
+                : [...prev, name]
         );
     };
 
@@ -19,6 +30,17 @@ const Sidebar = () => {
         { name: 'Employees', path: '/employees', icon: Users, show: checkResourceAccess('Employees') },
         { name: 'Departments', path: '/departments', icon: Building2, show: checkResourceAccess('Departments') },
         { name: 'Roles', path: '/roles', icon: ShieldCheck, show: checkResourceAccess('Roles') },
+        {
+            name: 'Payroll',
+            path: '/payroll',
+            icon: Receipt,
+            show: checkResourceAccess('Payroll'),
+            subItems: [
+                { name: 'Allowances', path: '/payroll/allowances', icon: Banknote },
+                { name: 'Deductions', path: '/payroll/deductions', icon: Calculator },
+                { name: 'Employee Payroll', path: '/payroll/employee-payroll', icon: Wallet },
+            ]
+        }
     ].filter(item => item.show);
 
     return (
@@ -42,10 +64,54 @@ const Sidebar = () => {
                 )}
             </div>
 
-            <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto no-scrollbar">
+            <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto no-scrollbar">
                 {navItems.map((item) => {
                     const Icon = item.icon;
-                    const isActive = location.pathname === item.path;
+                    const hasSubItems = item.subItems && item.subItems.length > 0;
+                    const isOpen = openMenus.includes(item.name);
+                    const isActive = location.pathname === item.path || (hasSubItems && item.subItems?.some(sub => location.pathname === sub.path));
+
+                    if (hasSubItems && !isCollapsed) {
+                        return (
+                            <div key={item.name} className="space-y-1">
+                                <button
+                                    onClick={() => toggleMenu(item.name)}
+                                    className={`flex items-center justify-between w-full px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
+                                        ? 'bg-blue-600/10 text-blue-500'
+                                        : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                                        }`}
+                                >
+                                    <div className="flex items-center">
+                                        <Icon className={`w-5 h-5 mr-3 transition-colors ${isActive ? 'text-blue-500' : 'group-hover:text-white'}`} />
+                                        <span className="font-medium whitespace-nowrap">{item.name}</span>
+                                    </div>
+                                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                                </button>
+                                {isOpen && (
+                                    <div className="ml-4 space-y-1 mt-1">
+                                        {item.subItems?.map((subItem) => {
+                                            const SubIcon = subItem.icon;
+                                            const isSubActive = location.pathname === subItem.path;
+                                            return (
+                                                <Link
+                                                    key={subItem.path}
+                                                    to={subItem.path}
+                                                    className={`flex items-center px-4 py-2.5 rounded-lg transition-all duration-200 group ${isSubActive
+                                                        ? 'text-blue-500 bg-blue-500/5'
+                                                        : 'text-gray-500 hover:text-white hover:bg-gray-800'
+                                                        }`}
+                                                >
+                                                    <SubIcon className={`w-4 h-4 mr-3 ${isSubActive ? 'text-blue-500' : 'group-hover:text-white'}`} />
+                                                    <span className="text-sm font-medium">{subItem.name}</span>
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }
+
                     return (
                         <Link
                             key={item.path}

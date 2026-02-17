@@ -30,7 +30,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            const parsedUser = JSON.parse(storedUser);
+            setUser(parsedUser);
+
+            // Refresh profile from backend to get latest roles/permissions
+            axios.get('http://localhost:5000/api/auth/me', {
+                headers: { Authorization: `Bearer ${parsedUser.token}` }
+            }).then(res => {
+                const updatedUser = { ...res.data, token: parsedUser.token };
+                setUser(updatedUser);
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+            }).catch(err => {
+                console.error('Failed to refresh user profile', err);
+                if (err.response?.status === 401) {
+                    logout();
+                }
+            });
         }
         setIsLoading(false);
     }, []);

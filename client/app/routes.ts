@@ -10,5 +10,8 @@ export default [
         route("employees", "routes/employees.tsx"),
         route("roles", "routes/roles.tsx"),
         route("departments", "routes/departments.tsx"),
+        route("payroll/allowances", "routes/payroll/allowances.tsx"),
+        route("payroll/deductions", "routes/payroll/deductions.tsx"),
+        route("payroll/employee-payroll", "routes/payroll/employee-payroll.tsx"),
     ]),
 ] satisfies RouteConfig;

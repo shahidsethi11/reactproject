@@ -12,6 +12,8 @@ router.get('/', protect, checkPermission('Employees', 'canView'), async (req: Re
             .find()
             .populate('role')
             .populate('department')
+            .populate('allowances')
+            .populate('deductions')
             .lean();
 
         res.json(employees);
