@@ -15,6 +15,8 @@ import departmentRoutes from './routes/departments';
 import allowanceRoutes from './routes/allowances';
 import deductionRoutes from './routes/deductions';
 import payrollRoutes from './routes/payroll';
+import attendanceRoutes from './routes/attendance';
+import leaveRoutes from './routes/leaves';
 
 app.use(cors());
 app.use(express.json());
@@ -26,6 +28,8 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/allowances', allowanceRoutes);
 app.use('/api/deductions', deductionRoutes);
 app.use('/api/payroll', payrollRoutes);
+app.use('/api/attendance', attendanceRoutes);
+app.use('/api/leaves', leaveRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

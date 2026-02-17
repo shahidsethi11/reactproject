@@ -9,8 +9,15 @@ export interface IEmployee extends Document {
     role: mongoose.Types.ObjectId;
     dateJoined: Date;
     basicSalary: number;
-    allowances: mongoose.Types.ObjectId[];
-    deductions: mongoose.Types.ObjectId[];
+    biometricId?: string;
+    allowances: Array<{
+        allowance: mongoose.Types.ObjectId;
+        amount: number;
+    }>;
+    deductions: Array<{
+        deduction: mongoose.Types.ObjectId;
+        amount: number;
+    }>;
     qualifications: Array<{ degree: string, institution: string, year: number }>;
     experience: Array<{ company: string, position: string, duration: string }>;
 }
@@ -24,8 +31,15 @@ const EmployeeSchema: Schema = new Schema({
     role: { type: Schema.Types.ObjectId, ref: 'Role', required: true },
     dateJoined: { type: Date, default: Date.now },
     basicSalary: { type: Number, default: 0 },
-    allowances: [{ type: Schema.Types.ObjectId, ref: 'Allowance' }],
-    deductions: [{ type: Schema.Types.ObjectId, ref: 'Deduction' }],
+    biometricId: { type: String, unique: true, sparse: true },
+    allowances: [{
+        allowance: { type: Schema.Types.ObjectId, ref: 'Allowance' },
+        amount: { type: Number, default: 0 }
+    }],
+    deductions: [{
+        deduction: { type: Schema.Types.ObjectId, ref: 'Deduction' },
+        amount: { type: Number, default: 0 }
+    }],
     qualifications: [{
         degree: String,
         institution: String,

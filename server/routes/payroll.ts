@@ -30,7 +30,9 @@ router.post('/generate', protect, checkPermission(RESOURCE_NAMES.PAYROLL, 'canSa
     }
 
     try {
-        const employees = await Employee.find().populate('allowances deductions');
+        const employees = await Employee.find().populate({
+            path: 'allowances.allowance deductions.deduction'
+        });
         const payrollRecords = [];
 
         for (const emp of employees) {
@@ -40,27 +42,29 @@ router.post('/generate', protect, checkPermission(RESOURCE_NAMES.PAYROLL, 'canSa
             const deductionDetails = [];
 
             // Calculate Allowances
-            for (const allow of (emp.allowances as any)) {
+            for (const item of (emp.allowances as any)) {
+                if (!item.allowance) continue;
                 let amount = 0;
-                if (allow.type === 'Percentage') {
-                    amount = (allow.value / 100) * emp.basicSalary;
+                if (item.allowance.type === 'Percentage') {
+                    amount = (item.amount / 100) * emp.basicSalary;
                 } else {
-                    amount = allow.value;
+                    amount = item.amount;
                 }
                 allowanceTotal += amount;
-                allowanceDetails.push({ name: allow.name, amount });
+                allowanceDetails.push({ name: item.allowance.name, amount });
             }
 
             // Calculate Deductions
-            for (const ded of (emp.deductions as any)) {
+            for (const item of (emp.deductions as any)) {
+                if (!item.deduction) continue;
                 let amount = 0;
-                if (ded.type === 'Percentage') {
-                    amount = (ded.value / 100) * emp.basicSalary;
+                if (item.deduction.type === 'Percentage') {
+                    amount = (item.amount / 100) * emp.basicSalary;
                 } else {
-                    amount = ded.value;
+                    amount = item.amount;
                 }
                 deductionTotal += amount;
-                deductionDetails.push({ name: ded.name, amount });
+                deductionDetails.push({ name: item.deduction.name, amount });
             }
 
             const netSalary = emp.basicSalary + allowanceTotal - deductionTotal;

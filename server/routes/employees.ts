@@ -13,8 +13,8 @@ router.get('/', protect, checkPermission(RESOURCE_NAMES.EMPLOYEES, 'canView'), a
             .find()
             .populate('role')
             .populate('department')
-            .populate('allowances')
-            .populate('deductions')
+            .populate('allowances.allowance')
+            .populate('deductions.deduction')
             .lean();
 
         res.json(employees);

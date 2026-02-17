@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router';
-import { LayoutDashboard, Users, ShieldCheck, LogOut, Building2, ChevronLeft, ChevronRight, ChevronDown, Banknote, Calculator, Wallet, Receipt } from 'lucide-react';
+import { LayoutDashboard, Users, ShieldCheck, LogOut, Building2, ChevronLeft, ChevronRight, ChevronDown, Banknote, Calculator, Wallet, Receipt, CalendarCheck, ClipboardList } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Sidebar = () => {
@@ -40,7 +40,17 @@ const Sidebar = () => {
                 { name: 'Deductions', path: '/payroll/deductions', icon: Calculator },
                 { name: 'Employee Payroll', path: '/payroll/employee-payroll', icon: Wallet },
             ]
-        }
+        },
+        {
+            name: 'Attendance',
+            path: '/attendance',
+            icon: CalendarCheck,
+            show: checkResourceAccess('Attendance') || checkResourceAccess('Leaves'),
+            subItems: [
+                { name: 'Attendance Log', path: '/attendance/logs', icon: CalendarCheck, show: checkResourceAccess('Attendance') },
+                { name: 'Leaves', path: '/leaves', icon: ClipboardList, show: checkResourceAccess('Leaves') },
+            ].filter(sub => sub.show)
+        },
     ].filter(item => item.show);
 
     return (
