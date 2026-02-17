@@ -3,6 +3,7 @@ import Payroll from '../models/Payroll';
 import Employee from '../models/Employee';
 import { protect, checkPermission } from '../middleware/auth';
 import { RESOURCE_NAMES } from '../constants/resources';
+import { generateSalarySlip } from '../services/payrollService';
 
 const router = express.Router();
 
@@ -18,6 +19,26 @@ router.get('/', protect, checkPermission(RESOURCE_NAMES.PAYROLL, 'canView'), asy
         res.json(payrolls);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Download salary report PDF
+router.get('/report/:id', protect, checkPermission(RESOURCE_NAMES.PAYROLL, 'canView'), async (req: Request, res: Response) => {
+    try {
+        const payroll = await Payroll.findById(req.params.id).populate('employee');
+
+        if (!payroll) {
+            return res.status(404).json({ message: 'Payroll record not found' });
+        }
+
+        const employee = payroll.employee as any;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=salary-slip-${employee.firstName}-${payroll.month}-${payroll.year}.pdf`);
+
+        generateSalarySlip(payroll, res);
+    } catch (error) {
+        console.error('PDF generation error:', error);
+        res.status(500).json({ message: 'Error generating PDF report' });
     }
 });
 

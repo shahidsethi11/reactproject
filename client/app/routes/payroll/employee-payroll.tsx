@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
-import { Wallet, RefreshCcw, CheckCircle2, AlertCircle, ChevronDown, Receipt } from 'lucide-react';
+import { Wallet, RefreshCcw, CheckCircle2, AlertCircle, ChevronDown, Receipt, Download } from 'lucide-react';
 
 export default function EmployeePayroll() {
     const { user } = useAuth();
@@ -53,6 +53,34 @@ export default function EmployeePayroll() {
         } finally {
             setGenerating(false);
         }
+    };
+
+    const handleDownloadPDF = (payrollId: string, employeeName: string) => {
+        const url = `http://localhost:5000/api/payroll/report/${payrollId}`;
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `salary-slip-${employeeName}-${selectedMonth}-${selectedYear}.pdf`);
+        link.setAttribute('target', '_blank');
+
+        // Add authorization header by opening in new window with fetch
+        fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => response.blob())
+            .then(blob => {
+                const blobUrl = window.URL.createObjectURL(blob);
+                link.href = blobUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(blobUrl);
+            })
+            .catch(error => {
+                console.error('Error downloading PDF:', error);
+                alert('Failed to download salary report.');
+            });
     };
 
     return (
@@ -113,12 +141,13 @@ export default function EmployeePayroll() {
                                 <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Financial Core</th>
                                 <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Outcome Calculation</th>
                                 <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Registry Status</th>
+                                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={4} className="px-8 py-24 text-center">
+                                    <td colSpan={5} className="px-8 py-24 text-center">
                                         <div className="flex flex-col items-center justify-center space-y-4">
                                             <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
                                             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Accessing Ledger...</p>
@@ -127,7 +156,7 @@ export default function EmployeePayroll() {
                                 </tr>
                             ) : payrolls.length === 0 ? (
                                 <tr>
-                                    <td colSpan={4} className="px-8 py-24 text-center">
+                                    <td colSpan={5} className="px-8 py-24 text-center">
                                         <div className="max-w-sm mx-auto space-y-4">
                                             <div className="w-16 h-16 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto">
                                                 <Wallet className="w-8 h-8 text-gray-300" />
@@ -184,6 +213,16 @@ export default function EmployeePayroll() {
                                                 }`}>
                                                 {p.status}
                                             </span>
+                                        </td>
+                                        <td className="px-8 py-6 text-center">
+                                            <button
+                                                onClick={() => handleDownloadPDF(p._id, `${p.employee?.firstName}-${p.employee?.lastName}`)}
+                                                className="inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 text-white rounded-xl text-[9px] font-black uppercase tracking-[0.2em] hover:bg-blue-700 transition-all active:scale-95 shadow-lg shadow-blue-200"
+                                                title="Download Salary Report"
+                                            >
+                                                <Download className="w-4 h-4 mr-1.5" />
+                                                Report
+                                            </button>
                                         </td>
                                     </tr>
                                 ))
